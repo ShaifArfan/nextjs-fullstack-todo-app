@@ -1,7 +1,17 @@
+import { signIn } from "@/auth";
 import React from "react";
 
 function Page() {
-  return <div>Login</div>;
+  return (
+    <form
+      action={async () => {
+        "use server";
+        await signIn("github", { redirectTo: "/account" });
+      }}
+    >
+      <button type="submit">Signin with GitHub</button>
+    </form>
+  );
 }
 
 export default Page;
