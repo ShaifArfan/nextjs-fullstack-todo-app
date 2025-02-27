@@ -1,6 +1,9 @@
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import ClearTodo from "@/components/ClearTodo";
 import CreateTodo from "@/components/CreateTodo";
 import TodoItem from "@/components/TodoItem";
+import { prisma } from "@/prisma/prisma";
 
 const mockTodo = [
   {
@@ -14,7 +17,22 @@ const mockTodo = [
     done: false,
   },
 ];
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const todos = await prisma.todo.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return (
     <>
       <div className="container">
@@ -23,18 +41,22 @@ export default function Home() {
             <CreateTodo></CreateTodo>
           </div>
           <div className="flex justify-between">
-            <h1>Todo list ({mockTodo.length})</h1>
+            <h1>Todo list ({todos.length})</h1>
             <ClearTodo></ClearTodo>
           </div>
         </div>
         <div>
-          <ul className="space-y-1.5">
-            {mockTodo.map((todo) => (
-              <li key={todo.id}>
-                <TodoItem key={todo.id} todo={todo} />
-              </li>
-            ))}
-          </ul>
+          {todos.length < 1 ? (
+            <p>No todo found</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {todos.map((todo) => (
+                <li key={todo.id}>
+                  <TodoItem key={todo.id} todo={todo} />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </>
