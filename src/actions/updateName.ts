@@ -5,20 +5,27 @@ import { prisma } from "@/prisma/prisma";
 
 export async function updateUserName(name: string) {
   const session = await auth();
+  const userId = session?.user?.id;
 
-  if (name === "" || !session?.user?.email)
-    return {
-      status: "failed",
-    };
-  const data = await prisma.user.update({
-    data: {
-      name: name,
-    },
-    where: { email: session?.user?.email },
-  });
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  if (name === "") {
+    throw new Error("Name cannot be empty.");
+  }
 
-  return {
-    status: "success",
-    data: data,
-  };
+  try {
+    const data = await prisma.user.update({
+      data: {
+        name: name,
+      },
+      where: {
+        id: userId,
+      },
+    });
+
+    return data;
+  } catch (e) {
+    throw new Error("Failed to update name");
+  }
 }

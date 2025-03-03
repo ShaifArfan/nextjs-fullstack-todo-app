@@ -1,36 +1,31 @@
-import { auth } from "@/auth";
-import { prisma } from "@/prisma/prisma";
-import { revalidatePath } from "next/cache";
-import React from "react";
+"use client";
 
-async function CreateTodo() {
-  const session = await auth();
+import { createTodo } from "@/actions/createTodo";
+import LoadingSpinner from "./LoadingSpinner";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-  if (!session?.user?.email) {
-    return null;
-  }
-  const userEmail = session.user.email;
-
+function CreateTodo() {
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <form
       className="flex gap-2 items-stretch"
-      action={async (formdata) => {
-        "use server";
-        const todoText = formdata.get("text") as string;
-        if (!todoText) return;
-
-        await prisma.todo.create({
-          data: {
-            title: todoText,
-            user: {
-              connect: {
-                email: userEmail,
-              },
-            },
-          },
-        });
-
-        revalidatePath("/");
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        const text = (e.target as HTMLFormElement).text.value;
+        try {
+          await createTodo(text);
+          (e.target as HTMLFormElement).text.value = "";
+        } catch (e) {
+          if (e instanceof Error) {
+            console.info(e.message);
+            toast.error(e.message);
+          }
+          console.error(e);
+        } finally {
+          setIsLoading(false);
+        }
       }}
     >
       <input
@@ -40,7 +35,7 @@ async function CreateTodo() {
         className="p-0.5 px-1 border-2 rounded-lg border-gray-600 w-full flex-1 "
       />
       <button className="bg-purple-600 px-2 py-1 rounded-lg cursor-pointer focus:outline-offset-2 focus:outline">
-        Add Todo
+        {isLoading ? <LoadingSpinner color="#fff" /> : "Add Todo"}
       </button>
     </form>
   );

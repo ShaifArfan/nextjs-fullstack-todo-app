@@ -1,7 +1,9 @@
 "use client";
 
+import { deleteTodo } from "@/actions/deleteTodo";
 import { updateTodo } from "@/actions/updateTodo";
 import { Todo } from "@prisma/client";
+import LoadingSpinner from "./LoadingSpinner";
 import React from "react";
 
 function debounce(func: (text: string) => void, delay: number) {
@@ -16,17 +18,15 @@ function debounce(func: (text: string) => void, delay: number) {
 
 function TodoItem({ todo }: { todo: Todo }) {
   const [todoItem, setTodoItem] = React.useState(todo);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const titleRef = React.useRef<HTMLParagraphElement>(null);
 
   const handleUpdate = async (text: string) => {
     try {
-      const data = await updateTodo({
+      await updateTodo({
         id: todoItem.id,
         title: text,
       });
-      if (data.status !== "success") {
-        throw new Error("Failed to update todo");
-      }
     } catch (e) {
       titleRef.current?.textContent
         ? (titleRef.current.innerText = todoItem.title)
@@ -48,21 +48,25 @@ function TodoItem({ todo }: { todo: Todo }) {
           checked={todoItem.completed}
           className="w-[1em] cursor-pointer"
           onChange={async () => {
-            const data = await updateTodo({
-              id: todoItem.id,
-              completed: !todoItem.completed,
-            });
-            if (data.status === "success" && data.data) {
-              setTodoItem(data.data);
+            setTodoItem({ ...todoItem, completed: !todoItem.completed });
+            try {
+              await updateTodo({
+                id: todoItem.id,
+                completed: !todoItem.completed,
+              });
+            } catch (e) {
+              setTodoItem(todo);
+              console.error(e);
             }
-            console.log("clicked");
           }}
         />
         <div className="flex-1">
           <p
             ref={titleRef}
             contentEditable
-            className="w-fit"
+            className={`w-fit ${
+              todoItem.completed ? "line-through text-gray-400" : ""
+            }`}
             onInput={(e) => {
               const el = e.target as HTMLParagraphElement;
               debouncedUpdate(el.innerText);
@@ -76,8 +80,29 @@ function TodoItem({ todo }: { todo: Todo }) {
         </div>
       </div>
       <div className="flex gap-2 ">
-        <button className="text-sm cursor-pointer hover:bg-red-500  p-1 rounded-md">
-          Delete
+        <button
+          className={`text-sm cursor-pointer hover:bg-red-500  p-1 rounded-md ${
+            isDeleting ? " cursor-not-allowed bg-red-500" : ""
+          }`}
+          onClick={async () => {
+            setIsDeleting(true);
+            try {
+              await deleteTodo(todoItem.id);
+            } catch (e) {
+              if (e instanceof Error) {
+                console.info(e.message);
+              }
+              console.error(e);
+            } finally {
+              setIsDeleting(false);
+            }
+          }}
+        >
+          {isDeleting ? (
+            <LoadingSpinner color="white"></LoadingSpinner>
+          ) : (
+            "Delete"
+          )}
         </button>
       </div>
     </div>

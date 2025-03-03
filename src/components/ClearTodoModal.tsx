@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteAllTodos, deleteCompletedTodos } from "@/actions/deleteTodo";
 import {
   Dialog,
   DialogBackdrop,
@@ -7,6 +8,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 //
 
 interface ModalProps {
@@ -55,14 +57,23 @@ export default function ClearTodoModal({ open, setOpen }: ModalProps) {
             <div className="bg-slate-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={async () => {
+                  const data = await deleteAllTodos();
+                  toast.success(data.count + " todo(s) deleted");
+                  setOpen(false);
+                }}
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
               >
                 Clear All
               </button>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={async () => {
+                  console.log("Clear Completed");
+                  const data = await deleteCompletedTodos();
+                  toast.success(data.count + " todo(s) deleted");
+                  setOpen(false);
+                }}
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
               >
                 Clear Completed

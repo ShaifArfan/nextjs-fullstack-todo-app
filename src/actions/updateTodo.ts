@@ -15,26 +15,31 @@ export async function updateTodo({
   const session = await auth();
   const user = session?.user;
   if (!user) {
-    return {
-      status: "failed",
-      message: "User not found",
-    };
+    throw new Error("Unauthorized");
   }
 
-  console.log(title, completed);
-  const data = await prisma.todo.update({
-    where: {
-      id: id,
-      userId: user.id,
-    },
-    data: {
-      title,
-      completed,
-    },
-  });
+  if (!id) {
+    throw new Error("Id cannot be empty.");
+  }
 
-  return {
-    status: "success",
-    data: data,
-  };
+  if (title === "") {
+    throw new Error("Title cannot be empty.");
+  }
+
+  try {
+    const data = await prisma.todo.update({
+      where: {
+        id: id,
+        userId: user.id,
+      },
+      data: {
+        title,
+        completed,
+      },
+    });
+
+    return data;
+  } catch (e) {
+    throw new Error("Failed to update");
+  }
 }

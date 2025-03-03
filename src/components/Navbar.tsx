@@ -13,18 +13,27 @@ async function Navbar() {
         <div className="flex gap-2">
           {session ? (
             <>
-              <Link href="/account">Account</Link>
+              <Link href="/account" className="hover:underline">
+                Account
+              </Link>
               <form
                 action={async () => {
                   "use server";
                   await signOut();
                 }}
               >
-                <button type="submit">Logout</button>
+                <button
+                  type="submit"
+                  className="hover:underline cursor-pointer"
+                >
+                  Logout
+                </button>
               </form>
             </>
           ) : (
-            <Link href="/login">Login</Link>
+            <Link href="/login" className="hover:underline">
+              Login
+            </Link>
           )}
         </div>
       </div>

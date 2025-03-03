@@ -2,6 +2,8 @@
 
 import { updateUserName } from "@/actions/updateName";
 import React, { useState } from "react";
+import LoadingSpinner from "../LoadingSpinner";
+import toast from "react-hot-toast";
 
 function NameField({ name }: { name: string }) {
   const [value, setValue] = useState(name);
@@ -10,15 +12,15 @@ function NameField({ name }: { name: string }) {
   const updateName = async () => {
     try {
       setLoading(true);
-      const { data, status } = await updateUserName(value);
+      setError("");
+      const data = await updateUserName(value);
 
-      if (status === "success" && data?.name) {
-        setValue(data.name);
-      } else {
-        setError("Failed to update");
-        setValue(name);
-      }
+      setValue(data.name as string);
+      toast.success("Name updated successfully");
     } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
       console.log(err);
     } finally {
       setLoading(false);
@@ -26,25 +28,29 @@ function NameField({ name }: { name: string }) {
   };
 
   return (
-    <div className="flex gap-2 items-center">
+    <div className={`flex gap-2 items-center ${error ? "mb-4" : ""}`}>
       <label htmlFor="name">Name: </label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => {
-          setValue(e.currentTarget.value);
-        }}
-        className="border p-1 rounded-md"
-      />
+      <div className="relative">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            setValue(e.currentTarget.value);
+          }}
+          className={`border p-1 rounded-md ${
+            error ? "border-1 border-red-500" : ""
+          }`}
+        />
+        {error && (
+          <p className="text-red-500 text-xs absolute top-[100%]">{error}</p>
+        )}
+      </div>
       <button
-        className="px-2 py-1 rounded-md bg-lime-600 cursor-pointer hover:bg-lime-700"
+        className={`px-2 py-1 rounded-md bg-lime-600 cursor-pointer hover:bg-lime-700 `}
         onClick={updateName}
       >
-        {loading ? "Updating..." : "Update"}
+        {loading ? <LoadingSpinner color="white"></LoadingSpinner> : "Update"}
       </button>
-      {error && (
-        <div className="bg-red-300 p-2 rounded-md text-red-700">{error}</div>
-      )}
     </div>
   );
 }
