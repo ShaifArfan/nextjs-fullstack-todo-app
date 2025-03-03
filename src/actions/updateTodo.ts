@@ -40,6 +40,7 @@ export async function updateTodo({
 
     return data;
   } catch (e) {
+    console.error(e);
     throw new Error("Failed to update");
   }
 }

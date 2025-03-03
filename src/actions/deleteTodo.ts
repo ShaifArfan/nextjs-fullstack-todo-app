@@ -22,6 +22,7 @@ export async function deleteTodo(id: string) {
     revalidatePath("/");
     return data;
   } catch (e) {
+    console.error(e);
     throw new Error("Failed to delete todo");
   }
 }
@@ -45,6 +46,7 @@ export async function deleteCompletedTodos() {
       count,
     };
   } catch (e) {
+    console.error(e);
     throw new Error("Failed to delete completed todos");
   }
 }
@@ -67,10 +69,7 @@ export async function deleteAllTodos() {
       count,
     };
   } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
-    } else {
-      throw new Error("Failed to delete todos");
-    }
+    console.error(e);
+    throw new Error("Failed to delete todos");
   }
 }

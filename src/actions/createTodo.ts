@@ -27,6 +27,7 @@ export async function createTodo(title: string) {
     revalidatePath("/");
     return data;
   } catch (e) {
+    console.error(e);
     throw new Error("Failed to Create todo");
   }
 }

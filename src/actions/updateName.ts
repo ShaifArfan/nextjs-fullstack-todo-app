@@ -26,6 +26,7 @@ export async function updateUserName(name: string) {
 
     return data;
   } catch (e) {
+    console.error(e);
     throw new Error("Failed to update name");
   }
 }

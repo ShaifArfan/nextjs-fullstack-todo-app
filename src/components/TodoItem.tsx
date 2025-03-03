@@ -24,13 +24,13 @@ function TodoItem({ todo }: { todo: Todo }) {
   const handleUpdate = async (text: string) => {
     try {
       await updateTodo({
-        id: todoItem.id,
+        id: todo.id,
         title: text,
       });
     } catch (e) {
-      titleRef.current?.textContent
-        ? (titleRef.current.innerText = todoItem.title)
-        : null;
+      if (titleRef.current?.textContent) {
+        titleRef.current.innerText = todo.title;
+      }
       console.error(e);
     }
   };

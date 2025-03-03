@@ -5,18 +5,6 @@ import CreateTodo from "@/components/CreateTodo";
 import TodoItem from "@/components/TodoItem";
 import { prisma } from "@/prisma/prisma";
 
-const mockTodo = [
-  {
-    id: 1,
-    title: "Todo item 01",
-    done: false,
-  },
-  {
-    id: 2,
-    title: "Todo item 02",
-    done: false,
-  },
-];
 export default async function Home() {
   const session = await auth();
 
