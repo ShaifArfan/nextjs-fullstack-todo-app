@@ -5,7 +5,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-const createTodoFn = (_: any, formData: FormData) => {
+const createTodoFn = (_: unknown, formData: FormData) => {
   console.log("formData", formData);
   const title: string = formData.get("title") as string;
   return createTodo(title);
