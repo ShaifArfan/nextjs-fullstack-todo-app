@@ -6,6 +6,7 @@ import { Todo } from "@prisma/client";
 import LoadingSpinner from "./LoadingSpinner";
 import React, { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { ActionReturnType } from "@/type";
 
 function debounce(func: (text: string) => void, delay: number) {
   let timerId: NodeJS.Timeout;
