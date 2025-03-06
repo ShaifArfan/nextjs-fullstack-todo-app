@@ -57,9 +57,13 @@ export default function ClearTodoModal({ open, setOpen }: ModalProps) {
             <div className="bg-slate-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
               <button
                 type="button"
-                onClick={async () => {
-                  const data = await deleteAllTodos();
-                  toast.success(data.count + " todo(s) deleted");
+                onClick={() => {
+                  const promise = deleteAllTodos();
+                  toast.promise(promise, {
+                    loading: "Deleting all todos",
+                    success: (data) => data.data?.count + " todo(s) deleted",
+                    error: "Failed to delete Todo",
+                  });
                   setOpen(false);
                 }}
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
@@ -68,10 +72,13 @@ export default function ClearTodoModal({ open, setOpen }: ModalProps) {
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  console.log("Clear Completed");
-                  const data = await deleteCompletedTodos();
-                  toast.success(data.count + " todo(s) deleted");
+                onClick={() => {
+                  const promise = deleteCompletedTodos();
+                  toast.promise(promise, {
+                    loading: "Deleting Completed todos",
+                    success: (data) => data.data?.count + " todo(s) deleted",
+                    error: "Failed to delete Todo",
+                  });
                   setOpen(false);
                 }}
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"

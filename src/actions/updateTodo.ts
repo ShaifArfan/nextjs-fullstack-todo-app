@@ -15,15 +15,11 @@ export async function updateTodo({
   const session = await auth();
   const user = session?.user;
   if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!id) {
-    throw new Error("Id cannot be empty.");
+    return { isSuccess: false, error: "Unauthorize" };
   }
 
   if (title === "") {
-    throw new Error("Title cannot be empty.");
+    throw new Error("Title is required");
   }
 
   try {
@@ -38,9 +34,12 @@ export async function updateTodo({
       },
     });
 
-    return data;
+    return {
+      isSuccess: true,
+      data,
+    };
   } catch (e) {
     console.error(e);
-    throw new Error("Failed to update");
+    return { isSuccess: false, error: "Failed to update" };
   }
 }

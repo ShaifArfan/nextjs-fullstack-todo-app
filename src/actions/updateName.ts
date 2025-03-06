@@ -8,10 +8,10 @@ export async function updateUserName(name: string) {
   const userId = session?.user?.id;
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return { isSuccess: false, error: "Unauthorize" };
   }
   if (name === "") {
-    throw new Error("Name cannot be empty.");
+    return { isSuccess: false, error: "Name is required" };
   }
 
   try {
@@ -24,9 +24,12 @@ export async function updateUserName(name: string) {
       },
     });
 
-    return data;
+    return {
+      isSuccess: true,
+      data: data,
+    };
   } catch (e) {
     console.error(e);
-    throw new Error("Failed to update name");
+    return { isSuccess: false, error: "Failed to update name" };
   }
 }

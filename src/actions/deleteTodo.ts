@@ -8,7 +8,7 @@ export async function deleteTodo(id: string) {
   const session = await auth();
   const user = session?.user;
   if (!user) {
-    throw new Error("Unauthorized");
+    return { isSuccess: false, error: "Unauthorize" };
   }
 
   try {
@@ -20,10 +20,13 @@ export async function deleteTodo(id: string) {
     });
 
     revalidatePath("/");
-    return data;
+    return {
+      isSuccess: true,
+      data: data,
+    };
   } catch (e) {
     console.error(e);
-    throw new Error("Failed to delete todo");
+    return { isSuccess: false, error: "Failed to delete todo" };
   }
 }
 
@@ -31,7 +34,7 @@ export async function deleteCompletedTodos() {
   const session = await auth();
   const user = session?.user;
   if (!user) {
-    throw new Error("Unauthorized");
+    return { isSuccess: false, error: "Unauthorize" };
   }
   try {
     const { count } = await prisma.todo.deleteMany({
@@ -43,11 +46,14 @@ export async function deleteCompletedTodos() {
 
     revalidatePath("/");
     return {
-      count,
+      isSuccess: true,
+      data: {
+        count,
+      },
     };
   } catch (e) {
     console.error(e);
-    throw new Error("Failed to delete completed todos");
+    return { isSuccess: false, error: "Failed to delete completed todos" };
   }
 }
 
@@ -55,7 +61,7 @@ export async function deleteAllTodos() {
   const session = await auth();
   const user = session?.user;
   if (!user) {
-    throw new Error("Unauthorized");
+    return { isSuccess: false, error: "Unauthorize" };
   }
   try {
     const { count } = await prisma.todo.deleteMany({
@@ -66,10 +72,13 @@ export async function deleteAllTodos() {
 
     revalidatePath("/");
     return {
-      count,
+      isSuccess: true,
+      data: {
+        count,
+      },
     };
   } catch (e) {
     console.error(e);
-    throw new Error("Failed to delete todos");
+    return { isSuccess: false, error: "Failed to delete todos" };
   }
 }

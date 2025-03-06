@@ -2,40 +2,37 @@
 
 import { createTodo } from "@/actions/createTodo";
 import LoadingSpinner from "./LoadingSpinner";
-import { useState } from "react";
+import { useActionState, useEffect } from "react";
 import toast from "react-hot-toast";
 
+const createTodoFn = (_: any, formData: FormData) => {
+  console.log("formData", formData);
+  const title: string = formData.get("title") as string;
+  return createTodo(title);
+};
+
 function CreateTodo() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, formAction, isPending] = useActionState(createTodoFn, null);
+
+  useEffect(() => {
+    if (state && !state.isSuccess && state.error) {
+      toast.error(state.error);
+    }
+  }, [state]);
+
   return (
-    <form
-      className="flex gap-2 items-stretch"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        const text = (e.target as HTMLFormElement).text.value;
-        try {
-          await createTodo(text);
-          (e.target as HTMLFormElement).text.value = "";
-        } catch (e) {
-          if (e instanceof Error) {
-            console.info(e.message);
-            toast.error(e.message);
-          }
-          console.error(e);
-        } finally {
-          setIsLoading(false);
-        }
-      }}
-    >
+    <form className="flex gap-2 items-stretch" action={formAction}>
       <input
-        name="text"
+        name="title"
         type="text"
         placeholder="Create a todo"
         className="p-0.5 px-1 border-2 rounded-lg border-gray-600 w-full flex-1 "
       />
-      <button className="bg-purple-600 px-2 py-1 rounded-lg cursor-pointer focus:outline-offset-2 focus:outline">
-        {isLoading ? <LoadingSpinner color="#fff" /> : "Add Todo"}
+      <button
+        type="submit"
+        className="bg-purple-600 px-2 py-1 rounded-lg cursor-pointer focus:outline-offset-2 focus:outline"
+      >
+        {isPending ? <LoadingSpinner color="#fff" /> : "Add Todo"}
       </button>
     </form>
   );

@@ -4,7 +4,8 @@ import { deleteTodo } from "@/actions/deleteTodo";
 import { updateTodo } from "@/actions/updateTodo";
 import { Todo } from "@prisma/client";
 import LoadingSpinner from "./LoadingSpinner";
-import React from "react";
+import React, { useActionState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 function debounce(func: (text: string) => void, delay: number) {
   let timerId: NodeJS.Timeout;
@@ -16,9 +17,40 @@ function debounce(func: (text: string) => void, delay: number) {
   };
 }
 
+const handleDelete = async (
+  state: ActionReturnType<Todo> & {
+    id: string;
+  }
+) => {
+  const res = await deleteTodo(state.id);
+  return {
+    ...res,
+    id: state.id,
+  };
+};
+
 function TodoItem({ todo }: { todo: Todo }) {
   const [todoItem, setTodoItem] = React.useState(todo);
-  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [deleteTodoState, deleteTodoAction, isDeleting] = useActionState(
+    handleDelete,
+    {
+      id: todo.id,
+      isSuccess: false,
+      data: todo,
+    }
+  );
+
+  useEffect(() => {
+    console.log(deleteTodoState);
+    if (
+      deleteTodoState &&
+      !deleteTodoState.isSuccess &&
+      deleteTodoState.error
+    ) {
+      toast.error(deleteTodoState.error);
+    }
+  }, [deleteTodoState]);
+
   const titleRef = React.useRef<HTMLParagraphElement>(null);
 
   const handleUpdate = async (text: string) => {
@@ -79,24 +111,11 @@ function TodoItem({ todo }: { todo: Todo }) {
           </p>
         </div>
       </div>
-      <div className="flex gap-2 ">
+      <form action={deleteTodoAction} className="flex">
         <button
           className={`text-sm cursor-pointer hover:bg-red-500  p-1 rounded-md ${
             isDeleting ? " cursor-not-allowed bg-red-500" : ""
           }`}
-          onClick={async () => {
-            setIsDeleting(true);
-            try {
-              await deleteTodo(todoItem.id);
-            } catch (e) {
-              if (e instanceof Error) {
-                console.info(e.message);
-              }
-              console.error(e);
-            } finally {
-              setIsDeleting(false);
-            }
-          }}
         >
           {isDeleting ? (
             <LoadingSpinner color="white"></LoadingSpinner>
@@ -104,7 +123,7 @@ function TodoItem({ todo }: { todo: Todo }) {
             "Delete"
           )}
         </button>
-      </div>
+      </form>
     </div>
   );
 }

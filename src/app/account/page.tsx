@@ -19,8 +19,6 @@ async function page() {
     return null;
   }
 
-  console.log(user);
-
   return (
     <div className="container mt-5">
       <div className="space-y-2">
